@@ -2246,7 +2246,7 @@ let src_MyApp = (_temp2 = _class = class MyApp extends lit_element_LitElement {
   render() {
     return lit_html_html`<h3>Decorator test</h3>
       <button @click=${this.increment}>Increment</button>
-      <div>App value: ${this.count} (defined in properties static property)</div>
+      <div>App value: ${this.count}</div>
       <my-counter .value=${this.count}></my-counter>
     `;
   }
@@ -2261,7 +2261,7 @@ let src_MyCounter = (_dec = property({ type: Number }), (_class2 = class MyCount
   }
 
   render() {
-    return lit_html_html`<div>Component value: ${this.value} (defined in property decorator)</div>`;
+    return lit_html_html`<div>Component value: ${this.value}</div>`;
   }
 }, (_descriptor = _applyDecoratedDescriptor(_class2.prototype, 'value', [_dec], {
   enumerable: true,
