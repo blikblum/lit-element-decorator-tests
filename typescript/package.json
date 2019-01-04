@@ -1,0 +1,14 @@
+{
+  "devDependencies": {
+    "ts-loader": "^5.3.2",
+    "typescript": "^3.2.2",
+    "webpack": "^4.28.3",
+    "webpack-cli": "^3.2.0"
+  },
+  "dependencies": {
+    "@polymer/lit-element": "^0.6.5"
+  },
+  "scripts": {
+    "build": "webpack"
+  }
+}
