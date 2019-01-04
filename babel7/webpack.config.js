@@ -37,7 +37,12 @@ const specPluginsConfig = [
       decoratorsBeforeExport: true
     }
   ],
-  '@babel/plugin-proposal-class-properties'
+  [
+    '@babel/plugin-proposal-class-properties',
+    {
+      'loose': true
+    }
+  ]
 ]
 
 module.exports = [

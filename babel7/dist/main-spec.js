@@ -2243,19 +2243,73 @@ function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 
+const isSpecDecorator = args => {
+  return args.length === 1 && typeof args[0].kind === 'string';
+};
+
+function createSpecElementDescriptor({
+  kind,
+  key,
+  placement,
+  descriptor,
+  initializer
+}, options) {
+  const valueKey = typeof key === 'symbol' ? Symbol() : `__${key}`;
+  let underlyingDescriptor = {
+    enumerable: false,
+    configurable: false,
+    writable: true
+  };
+  let underlying = {
+    kind,
+    key: valueKey,
+    placement,
+    descriptor: underlyingDescriptor,
+    initializer
+  };
+  return {
+    kind: "method",
+    key,
+    placement,
+    descriptor: {
+      get() {
+        return this[valueKey];
+      },
+
+      set(value) {
+        const oldValue = this[valueKey];
+        this[valueKey] = value;
+
+        this._requestPropertyUpdate(name, oldValue, options);
+      },
+
+      enumerable: descriptor.enumerable,
+      configurable: descriptor.configurable
+    },
+    extras: [underlying]
+  };
+}
+
+const src_property = options => (...args) => {
+  if (isSpecDecorator(args)) {
+    return createSpecElementDescriptor(args[0], options);
+  } else {
+    const proto = args[0];
+    const name = args[1];
+    proto.constructor.createProperty(name, options);
+  }
+};
 
 class src_MyApp extends lit_element_LitElement {
   constructor(...args) {
     super(...args);
+    this.count = 0;
 
-    _defineProperty(this, "count", 0);
-
-    _defineProperty(this, "increment", () => {
+    this.increment = () => {
       this.count++;
-    });
+    };
   }
 
   render() {
@@ -2268,11 +2322,11 @@ class src_MyApp extends lit_element_LitElement {
 
 }
 
-_defineProperty(src_MyApp, "properties", {
+src_MyApp.properties = {
   count: {
     type: Number
   }
-});
+};
 
 let src_MyCounter = _decorate(null, function (_initialize, _LitElement) {
   class MyCounter extends _LitElement {
@@ -2288,7 +2342,7 @@ let src_MyCounter = _decorate(null, function (_initialize, _LitElement) {
     F: MyCounter,
     d: [{
       kind: "field",
-      decorators: [property({
+      decorators: [src_property({
         type: Number
       })],
       key: "value",

@@ -2197,6 +2197,63 @@ function _initializerWarningHelper(descriptor, context) { throw new Error('Decor
 
 
 
+const isSpecDecorator = args => {
+  return args.length === 1 && typeof args[0].kind === 'string';
+};
+
+function createSpecElementDescriptor({
+  kind,
+  key,
+  placement,
+  descriptor,
+  initializer
+}, options) {
+  const valueKey = typeof key === 'symbol' ? Symbol() : `__${key}`;
+  let underlyingDescriptor = {
+    enumerable: false,
+    configurable: false,
+    writable: true
+  };
+  let underlying = {
+    kind,
+    key: valueKey,
+    placement,
+    descriptor: underlyingDescriptor,
+    initializer
+  };
+  return {
+    kind: "method",
+    key,
+    placement,
+    descriptor: {
+      get() {
+        return this[valueKey];
+      },
+
+      set(value) {
+        const oldValue = this[valueKey];
+        this[valueKey] = value;
+
+        this._requestPropertyUpdate(name, oldValue, options);
+      },
+
+      enumerable: descriptor.enumerable,
+      configurable: descriptor.configurable
+    },
+    extras: [underlying]
+  };
+}
+
+const src_property = options => (...args) => {
+  if (isSpecDecorator(args)) {
+    return createSpecElementDescriptor(args[0], options);
+  } else {
+    const proto = args[0];
+    const name = args[1];
+    proto.constructor.createProperty(name, options);
+  }
+};
+
 class src_MyApp extends lit_element_LitElement {
   constructor(...args) {
     super(...args);
@@ -2222,7 +2279,7 @@ src_MyApp.properties = {
     type: Number
   }
 };
-let src_MyCounter = (_dec = property({
+let src_MyCounter = (_dec = src_property({
   type: Number
 }), (_class = (_temp = class MyCounter extends lit_element_LitElement {
   constructor(...args) {
