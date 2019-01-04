@@ -15,7 +15,7 @@ class MyApp extends LitElement {
   render()  {
     return html`<h3>Decorator test</h3>
       <button @click=${this.increment}>Increment</button>
-      <div>App value: ${this.count} (defined in properties static property)</div>
+      <div>App value: ${this.count}</div>
       <my-counter .value=${this.count}></my-counter>
     `
   }
@@ -26,7 +26,7 @@ class MyCounter extends LitElement {
   value = 0
 
   render()  {
-    return html`<div>Component value: ${this.value} (defined in property decorator)</div>`
+    return html`<div>Component value: ${this.value}</div>`
   }
 }
 
