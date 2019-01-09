@@ -2249,52 +2249,22 @@ const isSpecDecorator = args => {
   return args.length === 1 && typeof args[0].kind === 'string';
 };
 
-function createSpecElementDescriptor({
-  kind,
-  key,
-  placement,
-  descriptor,
-  initializer
-}, options) {
-  const valueKey = typeof key === 'symbol' ? Symbol() : `__${key}`;
-  let underlyingDescriptor = {
-    enumerable: false,
-    configurable: false,
-    writable: true
-  };
-  let underlying = {
-    kind,
-    key: valueKey,
-    placement,
-    descriptor: underlyingDescriptor,
-    initializer
-  };
-  return {
-    kind: "method",
-    key,
-    placement,
-    descriptor: {
-      get() {
-        return this[valueKey];
-      },
-
-      set(value) {
-        const oldValue = this[valueKey];
-        this[valueKey] = value;
-
-        this._requestPropertyUpdate(name, oldValue, options);
-      },
-
-      enumerable: descriptor.enumerable,
-      configurable: descriptor.configurable
-    },
-    extras: [underlying]
-  };
-}
-
 const src_property = options => (...args) => {
   if (isSpecDecorator(args)) {
-    return createSpecElementDescriptor(args[0], options);
+    const elementDescriptor = args[0];
+    const name = elementDescriptor.key; // key generation code copied from https://github.com/Polymer/lit-element/blob/master/src/lib/updating-element.ts
+
+    const key = typeof name === 'symbol' ? Symbol() : `__${name}`;
+    return { // We are creating an own property and using the original initializer, but changing the key,
+      // so foo becomes __foo. The getter and setter methods are created by createProperty().
+      ...elementDescriptor,
+      key,
+
+      finisher(ctor) {
+        ctor.createProperty(name, options);
+      }
+
+    };
   } else {
     const proto = args[0];
     const name = args[1];
